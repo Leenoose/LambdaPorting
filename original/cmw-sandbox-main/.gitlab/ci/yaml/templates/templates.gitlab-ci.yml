@@ -1,0 +1,48 @@
+.build-api:
+  image: mcr.microsoft.com/dotnet/sdk:6.0
+  script:
+    - bash $BASH_SCRIPTS_PATH/package-lambda.sh
+      --project-path="./$PROJECT_PATH"
+      --nuget-url=$NUGET_URL
+      --nuget-username=$NUGET_USERNAME
+      --nuget-token=$NUGET_TOKEN
+      --output-path=$OUTPUT_PATH
+  only:
+    - main
+  except:
+    - schedules
+
+
+.fetch-token-api:
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+  script:
+    - mkdir -p $OUTPUT_PATH
+    - cd $OUTPUT_PATH
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION > token.txt
+    - ls
+  only:
+    - main
+  except:
+    - schedules
+
+.build-api-image:
+  image: gdiener/dind-bash:latest
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ''
+  services:
+    - docker:19.03.8-dind
+  script:
+    - bash $BASH_SCRIPTS_PATH/build-lambda-image.sh
+      --project-path="./$PROJECT_PATH"
+      --output-path=$OUTPUT_PATH
+      --app-name=$APP_NAME
+      --aws-region=$AWS_DEFAULT_REGION
+      --ecr-repository-name=$ECR_REPOSITORY_NAME
+      --ci_build_number=$CI_PIPELINE_ID
+  only:
+    - main
+  except:
+    - schedules

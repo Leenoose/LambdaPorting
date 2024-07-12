@@ -1,0 +1,52 @@
+.deploy:
+    tags:
+        - fargate-terraform-gitlab
+    script:        
+        - echo $APP_NAME
+        - echo $HANDLER        
+        - cd ./$APPLICATION_SCRIPTS_PATH/        
+        - export TF_ADDRESS=$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$APPLICATION_NAME-$ENVIRONMENT-application
+        - gitlab-terraform init
+        - $TERRAFORM_RESOURCE_DESTROY &&
+            gitlab-terraform destroy -target="$TERRAFORM_RESOURCE_TARGET"
+            -var="environment=$ENVIRONMENT"
+            -var="aws_region=$AWS_DEFAULT_REGION"
+            -var="app_name=$APP_NAME"
+            -var="function_handler=$HANDLER"
+            -var="publish_path=$PUBLISH_PATH/"
+            -var="parent_gateway_name=$PARENT_GATEWAY"
+            -var="gateway_path=$GATEWAY_PATH"
+            -var="api_version_list=$API_VERSION_LIST"
+            -var="ci_pipeline_id=$CI_PIPELINE_ID"
+            -var
+        - gitlab-terraform plan
+            -var="environment=$ENVIRONMENT"
+            -var="aws_region=$AWS_DEFAULT_REGION"
+            -var="app_name=$APP_NAME"
+            -var="function_handler=$HANDLER"
+            -var="publish_path=$PUBLISH_PATH/"
+            -var="parent_gateway_name=$PARENT_GATEWAY"
+            -var="gateway_path=$GATEWAY_PATH"
+            -var="api_version_list=$API_VERSION_LIST"
+            -var="ci_pipeline_id=$CI_PIPELINE_ID"
+        - gitlab-terraform apply -auto-approve
+    only:
+        - main
+    except:
+        - schedules
+
+.deploy-infrastructure:
+    tags:
+        - fargate-terraform-gitlab
+    script:
+        - cd ./$INFRASTRUCTURE_SCRIPTS_PATH/
+        - export TF_ADDRESS=$CI_API_V4_URL/projects/$CI_PROJECT_ID/terraform/state/$CMW_DOMAIN_NAME-$ENVIRONMENT-infra
+        - gitlab-terraform init
+        - gitlab-terraform plan
+          -var="environment=$ENVIRONMENT"
+          -var="aws_region=$AWS_DEFAULT_REGION"
+          -var="app_name=$APP_NAME"
+          -var="parent_gateway_name=$PARENT_GATEWAY"
+        - gitlab-terraform apply -auto-approve
+    only:
+        - schedules

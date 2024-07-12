@@ -1,0 +1,71 @@
+deploy qat infrastructure:
+    stage: deploy
+    extends: .deploy-infrastructure
+    environment:
+        name: test
+        action: prepare
+    when: manual
+    variables:
+      APP_NAME: $APPLICATION_NAME
+
+build dashboard:
+  stage: build
+  extends: .build-api
+  environment:
+    name: test
+    action: prepare
+  artifacts:
+      name: $APPLICATION_NAME
+      paths:
+          - $PUBLISH_PATH  
+  variables:
+      PROJECT_PATH: $DASHBOARD_PROJECT_PATH
+      OUTPUT_PATH: $CI_PROJECT_DIR/artifacts/$APPLICATION_NAME
+      
+fetch aws token:
+  stage: fetch-token
+  extends: .fetch-token-api
+  artifacts:
+    name: $APPLICATION_NAME
+    paths:
+      - $PUBLISH_PATH
+    expire_in: 1 week
+  environment:
+    name: test
+    action: prepare
+  variables:
+    PROJECT_PATH: $DASHBOARD_PROJECT_PATH
+    OUTPUT_PATH: $CI_PROJECT_DIR/artifacts/$APPLICATION_NAME
+
+
+build dashboard image:
+  stage: build-image
+  extends: .build-api-image
+  artifacts:
+    name: $APPLICATION_NAME
+    paths:
+      - $PUBLISH_PATH
+    expire_in: 1 week
+  environment:
+    name: test
+    action: prepare
+  dependencies:
+        - fetch aws token
+  variables:
+    APP_NAME: $APPLICATION_NAME
+    PROJECT_PATH: $DASHBOARD_PROJECT_PATH
+    OUTPUT_PATH: $CI_PROJECT_DIR/artifacts/$APPLICATION_NAME
+
+deploy dashboard:
+    stage: deploy
+    extends: .deploy
+    environment:
+      name: test
+    dependencies:
+      - build dashboard image
+    variables:
+        PUBLISH_PATH: $CI_PROJECT_DIR/artifacts/$APPLICATION_NAME
+        APP_NAME: $APPLICATION_NAME
+        HANDLER: $FUNCTION_HANDLER
+        GATEWAY_PATH: $DASHBOARD_GATEWAY_PATH
+        API_VERSION_LIST: "[\"v1\"]"

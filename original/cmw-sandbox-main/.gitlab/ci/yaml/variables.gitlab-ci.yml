@@ -1,0 +1,15 @@
+variables:
+   BUILD_PATH: .gitlab/ci
+   INFRASTRUCTURE_SCRIPTS_PATH: $BUILD_PATH/infrastructure
+   APPLICATION_SCRIPTS_PATH: $BUILD_PATH/application
+   BASH_SCRIPTS_PATH: $BUILD_PATH/bash_scripts
+   ENDPOINT_CONFIGURATION_TYPE: REGIONAL
+   NUGET_URL: https://pkgs.dev.azure.com/flyscoot/f9c6ba7b-7a2d-45f8-921e-e87559b9a9e8/_packaging/Scoot.DotNet.Packages/nuget/v3/index.json
+
+   APPLICATION_NAME: dashboard
+   DASHBOARD_PROJECT_PATH: CMW.Dashboard
+   PUBLISH_PATH: ${CI_PROJECT_DIR}/artifacts/${APPLICATION_NAME}
+   DASHBOARD_GATEWAY_PATH: items
+   FUNCTION_HANDLER: CMW.Dashboard::CMW.Dashboard.LambdaEntryPoint::FunctionHandlerAsync
+   API_VERSION_LIST: '["v1"]'
+   

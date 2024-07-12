@@ -1,0 +1,11 @@
+stages:
+    - build
+    - fetch-token
+    - build-image
+    - deploy
+
+include:
+    - local: /.gitlab/ci/yaml/test.gitlab-ci.yml
+    - local: /.gitlab/ci/yaml/variables.gitlab-ci.yml
+    - local: /.gitlab/ci/yaml/templates/deploy-template.gitlab-ci.yml
+    - local: /.gitlab/ci/yaml/templates/templates.gitlab-ci.yml

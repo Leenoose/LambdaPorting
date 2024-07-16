@@ -6,7 +6,7 @@ namespace Sandbox.Controllers;
 public class ValuesController : ControllerBase
 {
     // GET api/values
-    [HttpGet]
+    [HttpGet] 
     public IEnumerable<string> Get()
     {
         return new string[] { "value1", "value2" };

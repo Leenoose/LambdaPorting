@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/dotnet:6
+FROM registry.access.redhat.com/ubi8/dotnet-60-runtime
 
 WORKDIR /var/task
 
